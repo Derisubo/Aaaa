@@ -1,0 +1,43 @@
+name: YourmomRdp
+
+on: workflow_dispatch
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+    timeout-minutes: 9999
+
+    steps:
+    - name: Download Ngrok.
+      run: |
+        Invoke-WebRequest https://drive.google.com/file/d/12di_BjSFkrynlp9wXRmQcF7-8t8ew0hX/view?usp=drivesdk -OutFile ngrok.zip
+        Invoke-WebRequest https://drive.google.com/file/d/123BdoRE4Hu4rjSbXjp4aAvv1DaS66dSD/view?usp=drivesdk -OutFile start.bat
+        Invoke-WebRequest https://drive.google.com/file/d/12BCh4t-G6z8MDs991cL3ubsnS6EL2gCW/view?usp=drivesdk -OutFile wallpaper.png
+        Invoke-WebRequest https://drive.google.com/file/d/122jjDRvr6zXeb77bjK3YX9nK3lxZ1RRB/view?usp=drivesdk -OutFile wallpaper.bat
+        Invoke-WebRequest https://drive.google.com/file/d/11k6qNUmie-YDLahWWh0_O6CiRVh3jZuU/view?usp=drivesdk -OutFile loop.bat
+    - name: Download Launcher.
+      run: |
+        Invoke-WebRequest https://drive.google.com/file/d/12dnHvFG49nkJ9FTkZJDqtCFbFYADfoms/view?usp=drivesdk -OutFile Node.js.lnk
+        Invoke-WebRequest https://drive.google.com/file/d/12gMsyfQPBWzJfTTnT_Rwpl39FmkYQ_UF/view?usp=drivesdk -OutFile "Visual Studio 2019.lnk"
+    - name: Extracting Ngrok File.
+      run: Expand-Archive ngrok.zip
+    - name: Connect To Account Ngrok.
+      run: .\ngrok\ngrok.exe authtoken $Env:NGROK_AUTH_TOKEN
+      env:
+        NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
+    - name: Turn on Access RDP.
+      run: | 
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server'-name "fDenyTSConnections" -Value 0
+        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -name "UserAuthentication" -Value 1
+        copy wallpaper.png D:\a\wallpaper.png
+        copy wallpaper.bat D:\a\wallpaper.bat
+        copy Node.js.lnk C:\Users\Public\Desktop\Node.js.lnk
+        copy "Visual Studio 2019.lnk" "C:\Users\Public\Desktop\Visual Studio 2019.lnk"
+    - name: Make Tunnel.
+      run: Start-Process Powershell -ArgumentList '-Noexit -Command ".\ngrok\ngrok.exe tcp --region ap 3389"'
+    - name: Connect To Your RDP..... Mohon Tunggu...
+      run: cmd /c start.bat
+    - name: RDP telah berhasil dibuat!!! Jangan lupa subscribe X-Cyber_Team
+      run: cmd /c loop.bat
